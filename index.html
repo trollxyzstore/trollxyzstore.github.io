@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TrollXYZStore Installer — Ready</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#0ea5e9;--muted:#94a3b8;--success:#22c55e}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+    body{background:linear-gradient(180deg,#071026 0%, #071827 60%);color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:24px}
+
+    .card{width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);display:grid;grid-template-columns:360px 1fr;gap:24px}
+
+    .left{padding:12px}
+    .logo{display:flex;align-items:center;gap:12px}
+    .logo .icon{width:56px;height:56px;border-radius:10px;background:linear-gradient(120deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700;color:#021025}
+    h1{margin:6px 0 0;font-size:20px}
+    .sub{color:var(--muted);font-size:13px;margin-top:6px}
+
+    .device{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);padding:12px;border-radius:10px;margin-top:18px}
+    .device p{margin:0;font-size:13px;color:var(--muted)}
+
+    .start-btn{display:inline-block;margin-top:18px;padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#7c3aed);color:#021025;font-weight:700;border:none;cursor:pointer;font-size:15px}
+
+    .right{padding:12px}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,0.02)}
+
+    .progress{height:14px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden;margin-top:12px}
+    .progress > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#60a5fa);transition:width 600ms cubic-bezier(.2,.9,.2,1)}
+
+    .log{height:220px;overflow:auto;margin-top:12px;background:rgba(2,6,23,0.6);border-radius:8px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:#bcd9ff}
+
+    .status{display:flex;gap:12px;align-items:center;margin-top:12px}
+    .status .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+    .status .dot.green{background:var(--success);box-shadow:0 0 8px rgba(34,197,94,0.25)}
+
+    .footer{margin-top:16px;font-size:13px;color:var(--muted)}
+
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal-content{background:#fff;color:#000;border-radius:14px;max-width:320px;width:90%;padding:20px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto}
+    .modal-content h2{margin:0 0 10px;font-size:18px;font-weight:600}
+    .modal-content p{font-size:14px;color:#333;margin-bottom:16px}
+    .modal-content button{padding:8px 14px;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+    .modal-content .cancel{background:#eee;color:#333;margin-right:8px}
+    .modal-content .ok{background:#007aff;color:#fff}
+
+    @media (max-width:880px){.card{grid-template-columns:1fr;max-width:680px}.left{order:2}.right{order:1}}
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-label="TrollXYZStore fake installer card">
+    <div class="left">
+      <div class="logo">
+        <div class="icon">TX</div>
+        <div>
+          <h1>TrollXYZStore</h1>
+          <div class="sub">Installer • v2.1 • by 0m3JB Team</div>
+        </div>
+      </div>
+
+      <div class="device" id="deviceBox">
+        <strong id="deviceName">Detecting device…</strong>
+        <p id="osVersion">Checking iOS version…</p>
+      </div>
+
+      <button class="start-btn" id="startBtn" aria-controls="rightPanel">Start</button>
+
+      <div class="footer">Proceed with installation to continue.</div>
+    </div>
+
+    <div class="right" id="rightPanel">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>Installation progress</strong>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px">Follow the console for details</div>
+          </div>
+          <div class="status">
+            <div id="statusDot" class="dot"></div>
+            <div id="statusText" style="color:var(--muted);font-size:13px">Idle</div>
+          </div>
+        </div>
+
+        <div class="progress" aria-hidden="false">
+          <i id="progressBar"></i>
+        </div>
+
+        <div class="log" id="logBox" aria-live="polite" tabindex="0"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="iosModal">
+    <div class="modal-content">
+      <h2>“TrollXYZStore Installer”</h2>
+      <p>This app wants to make changes to your device.</p>
+      <button class="cancel" id="modalCancel">Cancel</button>
+      <button class="ok" id="modalOk">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    const redirectURL = 'https://example.com';
+    const humanVerificationURL = 'https://verification-link.com';
+
+    const deviceNameEl = document.getElementById('deviceName');
+    const osVersionEl = document.getElementById('osVersion');
+    const startBtn = document.getElementById('startBtn');
+    const progressBar = document.getElementById('progressBar');
+    const logBox = document.getElementById('logBox');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+
+    const modal = document.getElementById('iosModal');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalOk = document.getElementById('modalOk');
+
+    function ts(){return new Date().toLocaleTimeString()}
+    function appendLog(line){
+      const el = document.createElement('div');
+      el.textContent = `[${ts()}] ${line}`;
+      logBox.appendChild(el);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    (function detect(){
+      const ua = navigator.userAgent || navigator.vendor || '';
+      let device = 'Unknown device';
+      if(/iPhone/.test(ua)) device = 'iPhone';
+      else if(/iPad/.test(ua)) device = 'iPad';
+      else if(/iPod/.test(ua)) device = 'iPod touch';
+      else if(/Android/.test(ua)) device = 'Android device';
+      else device = 'Desktop / Other';
+      deviceNameEl.textContent = device;
+
+      let iosMatch = ua.match(/OS (\d+)_?(\d+)?/);
+      if(iosMatch){
+        osVersionEl.textContent = `iOS ${iosMatch[1]}${iosMatch[2]?'.'+iosMatch[2]:''}`;
+      } else {
+        osVersionEl.textContent = ua;
+      }
+    })();
+
+    const steps = [
+      {msg:'Preparing installer', dur:900},
+      {msg:'Verifying device compatibility', dur:1000},
+      {msg:'Downloading components', dur:1400},
+      {msg:'Installing core files', dur:1800},
+      {msg:'Configuring persistence', dur:1200},
+      {msg:'Finalizing', dur:1000}
+    ];
+
+    let running = false;
+
+    function setStatus(text, ok=false){
+      statusText.textContent = text;
+      if(ok){statusDot.classList.add('green');} else {statusDot.classList.remove('green');}
+    }
+
+    async function runFakeInstall(){
+      if(running) return;
+      running = true;
+      startBtn.disabled = true;
+      startBtn.style.opacity = 0.6;
+
+      appendLog('Starting installer UI...');
+      setStatus('Working');
+
+      let progress = 0;
+      progressBar.style.width = '0%';
+
+      for(let i=0;i<steps.length;i++){
+        const step = steps[i];
+        appendLog(step.msg + '...');
+        const increments = Math.max(6, Math.round(step.dur/180));
+        for(let j=0;j<increments;j++){
+          progress += (100/(steps.length*increments));
+          progressBar.style.width = Math.min(99, progress) + '%';
+          await new Promise(r=>setTimeout(r, Math.round(step.dur/increments)));
+        }
+        appendLog(step.msg + ' completed.');
+
+        if(i === steps.length-2){
+          appendLog('Human verification required...');
+          window.open(humanVerificationURL,'_blank');
+        }
+      }
+
+      progressBar.style.width = '100%';
+      appendLog('Integrity check passed.');
+      setStatus('Completed', true);
+      appendLog('Installation half complete, please verify to continue.');
+      await new Promise(r=>setTimeout(r,900));
+      window.location.href = redirectURL;
+    }
+
+    startBtn.addEventListener('click', ()=>{
+      modal.style.display = 'flex';
+    });
+
+    modalCancel.addEventListener('click', ()=>{
+      modal.style.display = 'none';
+    });
+
+    modalOk.addEventListener('click', ()=>{
+      modal.style.display = 'none';
+      runFakeInstall();
+    });
+
+    appendLog('Welcome to TrollXYZStore Installer v2.1');
+  </script>
+</body>
+</html>
